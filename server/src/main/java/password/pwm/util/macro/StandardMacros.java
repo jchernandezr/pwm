@@ -33,10 +33,17 @@ import password.pwm.ldap.UserInfo;
 import password.pwm.util.java.JavaHelper;
 import password.pwm.util.java.TimeDuration;
 import password.pwm.util.logging.PwmLogger;
+import password.pwm.util.macro.InternalMacros.EncodingMacro;
+import password.pwm.util.operations.CryptoUtil;
 import password.pwm.util.secure.PwmRandom;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -48,6 +55,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public abstract class StandardMacros {
     private static final PwmLogger LOGGER = PwmLogger.forClass(StandardMacros.class);
@@ -81,6 +92,9 @@ public abstract class StandardMacros {
         defaultMacros.put(OtpSetupTimeMacro.class, MacroImplementation.Scope.User);
         defaultMacros.put(ResponseSetupTimeMacro.class, MacroImplementation.Scope.User);
 
+        // wrapper macros: must be at the end to allow Macro in Macro during parsing
+        defaultMacros.put(EncodingMacro.class, MacroImplementation.Scope.System);
+        defaultMacros.put(EncryptionMacro.class, MacroImplementation.Scope.System);
         STANDARD_MACROS = Collections.unmodifiableMap(defaultMacros);
     }
 
@@ -650,6 +664,82 @@ public abstract class StandardMacros {
                 LOGGER.error("error reading response setup time macro replacement: " + e.getMessage());
             }
             return "";
+        }
+    }
+    
+    public static class EncryptionMacro extends AbstractMacro {
+        private static final Pattern PATTERN = Pattern.compile("@Encrypt:[^:]+:[^:]+:[^:]+:\\[\\[.*\\]\\]@");
+        // @Encrypt:CIPHER:SALT:SECRETKEY:value@
+
+        private enum EncryptType {
+            PBEWithMD5AndDES
+            ;
+
+            private String encrypt(final String salt, final String secretKey, final String input) throws MacroParseException {
+                switch (this) {
+                    case PBEWithMD5AndDES:
+                        try {
+                            return CryptoUtil.encrypt(secretKey, input);
+                        } catch (InvalidKeyException | NoSuchAlgorithmException
+                                | InvalidKeySpecException
+                                | NoSuchPaddingException
+                                | InvalidAlgorithmParameterException
+                                | UnsupportedEncodingException
+                                | IllegalBlockSizeException
+                                | BadPaddingException e) {
+                            throw new MacroParseException("error enrypting " + input + " with secretKey " + secretKey + " and salt " + salt + ", error was " + e.getMessage());
+
+                        }
+
+                    default:
+                        throw new MacroParseException("unimplemented encryptType '" + this.toString() + "' for Encrypt macro");
+                }
+            }
+
+            private static EncryptType forString(final String input) {
+                for (final EncryptType encryptType : EncryptType.values()) {
+                    if (encryptType.toString().equalsIgnoreCase(input)) {
+                        return encryptType;
+                    }
+                }
+                return null;
+            }
+        }
+
+
+        public Pattern getRegExPattern() {
+            return PATTERN;
+        }
+
+        public String replaceValue(
+                final String matchValue,
+                final MacroRequestInfo macroRequestInfo
+        )
+                throws MacroParseException
+        {
+            if (matchValue == null || matchValue.length() < 1) {
+                return "";
+            }
+
+            final String[] colonParts = matchValue.split(":");
+
+            if (colonParts.length < 5) {
+                throw new MacroParseException("not enough arguments for Encrypt macro");
+            }
+
+            final String cipher = colonParts[1];
+            final String salt = colonParts[2];
+            final String secretKey = colonParts[3];
+
+            final EncryptType encryptType = EncryptType.forString(cipher);
+            if (encryptType == null) {
+                throw new MacroParseException("unknown encryptType '" + cipher + "' for Encrypt macro. Only PBEWithMD5AndDES is supported.");
+            }
+
+            String value = matchValue; // can't use colonParts[4] as it may be split if value contains a colon.
+            value = value.replaceAll("^@Encrypt:[^:]+:[^:]+:[^:]+:\\[\\[","");
+            value = value.replaceAll("\\]\\]@$","");
+            return encryptType.encrypt(salt, secretKey, value);
         }
     }
 }
