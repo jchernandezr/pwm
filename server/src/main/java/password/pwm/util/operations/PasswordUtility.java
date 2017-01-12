@@ -301,6 +301,9 @@ public class PasswordUtility {
         if (oldPassword == null) {
             if (pwmSession.getSessionManager().getActor(pwmApplication).getChaiProvider().getDirectoryVendor() == ChaiProvider.DIRECTORY_VENDOR.MICROSOFT_ACTIVE_DIRECTORY) {
                 setPasswordWithoutOld = true;
+            } else if (pwmSession.getSessionManager().getActor(pwmApplication).getChaiProvider().getDirectoryVendor() == ChaiProvider.DIRECTORY_VENDOR.DIRECTORY_SERVER_389) {
+                //Same for other directories during migration
+                setPasswordWithoutOld = true;
             }
         }
 
