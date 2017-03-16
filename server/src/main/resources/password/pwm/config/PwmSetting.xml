@@ -502,7 +502,7 @@
     </setting>
     <setting hidden="false" key="ldap.usernameSearchFilter" level="1" required="true">
         <default>
-            <value><![CDATA[(&(objectClass=person)(cn=%USERNAME%))]]></value>
+            <value><![CDATA[(&(objectClass=person)(uid=%USERNAME%))]]></value>
         </default>
         <default template="AD">
             <value><![CDATA[(&(objectClass=person)(|(sAMAccountName=%USERNAME%)(cn=%USERNAME%)(mail=%USERNAME%)))]]></value>
@@ -539,7 +539,7 @@
     <setting hidden="false" key="ldap.user.group.attribute" level="2">
         <regex>^[a-zA-Z][a-zA-Z0-9-]*$</regex>
         <default>
-            <value><![CDATA[groupMembership]]></value>
+            <value><![CDATA[memberOf]]></value>
         </default>
         <default template="AD">
             <value>memberOf</value>
@@ -584,7 +584,7 @@
         <ldapPermission actor="proxy" access="read"/>
         <regex>^[a-zA-Z][a-zA-Z0-9-]*$</regex>
         <default>
-            <value><![CDATA[cn]]></value>
+            <value><![CDATA[uid]]></value>
         </default>
         <default template="ORACLE_DS">
             <value><![CDATA[uid]]></value>
