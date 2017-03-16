@@ -773,7 +773,7 @@
     <setting hidden="false" key="email.updateguest" level="2">
         <flag>MacroSupport</flag>
         <default>
-            <value>{"to":"@User:Email@","from":"Guest Registration Agent \u003c@DefaultEmailFromAddress@\u003e","subject":"Account update notification","bodyPlain":"Your account has been updated.","bodyHtml":"\u003cb\u003eYour account has been created.\u003c/b\u003e"}</value>
+            <value>{"to":"@User:Email@","from":"Guest Registration Agent \u003c@DefaultEmailFromAddress@\u003e","subject":"Account update notification","bodyPlain":"Your account has been updated.","bodyHtml":"\u003cb\u003eYour account has been updated.\u003c/b\u003e"}</value>
         </default>
     </setting>
     <setting hidden="false" key="email.sendpassword" level="2">
