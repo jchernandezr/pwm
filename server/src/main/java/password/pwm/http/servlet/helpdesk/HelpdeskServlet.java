@@ -29,6 +29,7 @@ import com.novell.ldapchai.exception.ChaiOperationException;
 import com.novell.ldapchai.exception.ChaiPasswordPolicyException;
 import com.novell.ldapchai.exception.ChaiUnavailableException;
 import com.novell.ldapchai.provider.ChaiProvider;
+
 import password.pwm.AppProperty;
 import password.pwm.PwmApplication;
 import password.pwm.PwmConstants;
@@ -73,6 +74,7 @@ import password.pwm.svc.stats.StatisticsManager;
 import password.pwm.svc.token.TokenService;
 import password.pwm.util.PasswordData;
 import password.pwm.util.RandomPasswordGenerator;
+import password.pwm.util.AttributeCompareUtility;
 import password.pwm.util.java.JavaHelper;
 import password.pwm.util.java.JsonUtil;
 import password.pwm.util.java.TimeDuration;
@@ -91,6 +93,7 @@ import password.pwm.ws.server.rest.RestSetPasswordServer;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -984,6 +987,13 @@ public class HelpdeskServlet extends ControlledPwmServlet {
                 try {
                     if (chaiUser.compareStringAttribute(name, suppliedValue)) {
                         successCount++;
+                    } else {
+                        if (formConfiguration.isFuzzyMatch()) {
+                            if (AttributeCompareUtility.compareNormalizedStringAttributes(chaiUser, name, suppliedValue)) {
+                                LOGGER.trace(pwmRequest, "successful fuzzy validation of ldap attribute value for '" + name + "'");
+                                successCount++;
+                            } 
+                        }
                     }
                 } catch (ChaiException e) {
                     LOGGER.error(pwmRequest, "error comparing ldap attribute during verification " + e.getMessage());
