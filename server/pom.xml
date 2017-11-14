@@ -659,6 +659,12 @@
             <artifactId>wiremock</artifactId>
             <version>1.58</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>org.mortbay.jetty</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
@@ -703,8 +709,15 @@
             <artifactId>ldap</artifactId>
             <version>2013.04.26</version>
         </dependency>
-        <!-- / Novell jars (not available from a maven repo) -->
 
+		<!-- Other jars (not available from a maven repo)  -->
+        <dependency>
+            <groupId>gcardone</groupId>
+            <artifactId>gcardone.junidecode</artifactId>
+            <version>0.2</version>
+        </dependency>
+
+        <!-- / Novell jars (not available from a maven repo) -->
         <dependency>
             <groupId>com.github.ldapchai</groupId>
             <artifactId>ldapchai</artifactId>

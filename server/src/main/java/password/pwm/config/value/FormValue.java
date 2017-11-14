@@ -151,6 +151,7 @@ public class FormValue extends AbstractValue implements StoredValue {
                 sb.append(" Unique:").append(formRow.isUnique());
                 sb.append(" Multi-Value:").append(formRow.isMultivalue());
                 sb.append(" Source:").append(formRow.getSource());
+                sb.append(" FuzzyMatch:").append(formRow.isFuzzyMatch());
                 sb.append("\n");
                 sb.append(" Label:").append(JsonUtil.serializeMap(formRow.getLabels())).append("\n");
                 sb.append(" Description:").append(JsonUtil.serializeMap(formRow.getDescription())).append("\n");
