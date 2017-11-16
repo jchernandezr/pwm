@@ -669,8 +669,9 @@ public abstract class StandardMacros {
     
     public static class EncryptionMacro extends AbstractMacro {
         private static final Pattern PATTERN = Pattern.compile("@Encrypt:[^:]+:[^:]+:[^:]+:\\[\\[.*\\]\\]@");
-        // @Encrypt:CIPHER:SALT:SECRETKEY:value@
-
+        //@Encrypt:CIPHER:SALT:SECRETKEY:value@
+        //@Encrypt:PBEWithMD5AndDES:egal:secretkey:[[@User:Password@]]@
+        
         private enum EncryptType {
             PBEWithMD5AndDES
             ;
