@@ -37,8 +37,8 @@ import password.pwm.util.java.JavaHelper;
 import password.pwm.util.logging.PwmLogger;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -193,18 +193,20 @@ public class MacroMachine {
     }
 
     private static Set<MacroImplementation.Scope> effectiveScopes(final MacroImplementation.MacroRequestInfo macroRequestInfo) {
-        final Set<MacroImplementation.Scope> scopes = new HashSet<>();
+        final Set<MacroImplementation.Scope> scopes = new LinkedHashSet<>();
         scopes.add(MacroImplementation.Scope.Static);
 
         final PwmApplication pwmApplication = macroRequestInfo.getPwmApplication();
         final PwmApplicationMode mode = pwmApplication != null ? pwmApplication.getApplicationMode() : PwmApplicationMode.ERROR;
         final boolean appModeOk = mode == PwmApplicationMode.RUNNING || mode == PwmApplicationMode.CONFIGURATION;
         if (appModeOk) {
-            scopes.add(MacroImplementation.Scope.System);
-
             if (macroRequestInfo.getUserInfo() != null) {
                 scopes.add(MacroImplementation.Scope.User);
             }
+
+            scopes.add(MacroImplementation.Scope.System);
+
+
         }
         return Collections.unmodifiableSet(scopes);
     }
